@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genética de Carpas Koi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* --- Reset e Configurações Globais --- */
+        :root {
+            --bg-color: #0a0a0a;
+            --surface-color: rgba(10, 10, 10, 0.6);
+            --primary-text-color: #f0f0f0;
+            --secondary-text-color: #a0a0a0;
+            --border-color: #333;
+            --header-bg: #222;
+            --gamete-bg: #333;
+            --phenotype-preto-bg: #111;
+            --phenotype-vermelho-bg: #a12121; /* Alterado de cinza para vermelho */
+            --phenotype-branco-bg: #e0e0e0;
+            --phenotype-branco-text: #111;
+            --shadow-color: rgba(0, 0, 0, 0.7);
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 80px; /* Offset for fixed header */
+        }
+
+        body {
+            margin: 0;
+            padding-top: 60px; /* Space for the fixed nav bar */
+            /* Background from the second file */
+            background-image: url('lindos-peixes-submarinos.svg');
+            background-size: cover;
+            background-position: center 70%;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            color: var(--primary-text-color);
+            line-height: 1.6;
+        }
+
+        /* --- Navegação --- */
+        .navbar {
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px var(--shadow-color);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 60px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: var(--primary-text-color);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background-color: var(--header-bg);
+            color: white;
+        }
+
+        /* --- Layout Principal --- */
+        .content-section {
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 8px 24px var(--shadow-color);
+            padding: 40px;
+            width: 95%;
+            max-width: 1400px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(5px); /* Frosted glass effect */
+        }
+
+        h1, h2, h3 {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--secondary-text-color);
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        /* --- Tabela de Cruzamento --- */
+        .table-container {
+            overflow-x: auto; /* Garante que a tabela seja rolável em telas pequenas */
+        }
+        
+        table {
+            width: 100%;
+            min-width: 600px; /* Evita que a tabela fique muito espremida */
+            border-collapse: collapse;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 16px 12px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .header-cell {
+            background-color: var(--header-bg);
+            color: white;
+        }
+
+        .gamete-header {
+            background-color: var(--gamete-bg);
+            color: white;
+        }
+
+        td {
+            background: rgba(20, 20, 20, 0.4);
+            transition: background-color 0.3s ease;
+        }
+
+        td:hover {
+            background-color: rgba(40, 40, 40, 0.6);
+        }
+
+        .genotype {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1.05em;
+        }
+
+        .arrow {
+            color: var(--secondary-text-color);
+            margin: 0 8px;
+        }
+
+        .phenotype-preto, .phenotype-vermelho, .phenotype-branco {
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 15px;
+            display: inline-block;
+            margin-left: 8px;
+            color: white;
+        }
+
+        .phenotype-preto { background-color: var(--phenotype-preto-bg); }
+        .phenotype-vermelho { background-color: var(--phenotype-vermelho-bg); }
+        .phenotype-branco {
+            background-color: var(--phenotype-branco-bg);
+            color: var(--phenotype-branco-text);
+            border: 1px solid #999;
+        }
+
+        /* --- Legenda e Análise --- */
+        .legend {
+            margin-top: 40px;
+            padding: 25px;
+            background: rgba(15, 15, 15, 0.5);
+            border-radius: 10px;
+            border-left: 4px solid var(--header-bg);
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .legend-column-divider {
+            border-left: 2px solid var(--border-color);
+            padding-left: 40px;
+        }
+
+        .legend-item {
+            margin-bottom: 15px;
+        }
+
+        .legend-item strong {
+            color: #e0e0e0;
+        }
+
+        /* --- Heredograma --- */
+        .main-image {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 20px auto;
+            background-color: #fff; /* Fundo branco para imagens com transparência */
+        }
+
+        .caption-container {
+            margin-top: 40px;
+            padding: 25px;
+            background: rgba(15, 15, 15, 0.5);
+            border-radius: 10px;
+            border-left: 4px solid var(--header-bg);
+        }
+
+        .caption-item {
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .caption-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        /* --- Animação de Pétalas --- */
+        .sakura-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Permite clicar através do container */
+            z-index: -1; /* Coloca o container atrás de todo o conteúdo */
+        }
+
+        .petal {
+            position: absolute;
+            background-color: #ffc0cb; /* Cor rosa para as pétalas */
+            border-radius: 150px 0;
+            width: 20px;
+            height: 30px;
+            opacity: 0.7; /* Opacidade reduzida */
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateX(105vw) rotate(360deg); /* Move para fora da tela à direita e gira */
+            }
+        }
+
+        /* Posições e durações das pétalas */
+        .petal:nth-child(1) { top: 5%; left: -10%; animation-duration: 15s; animation-delay: 0s; }
+        .petal:nth-child(2) { top: 15%; left: -5%; animation-duration: 12s; animation-delay: -2s; width: 15px; height: 25px; }
+        .petal:nth-child(3) { top: 25%; left: -15%; animation-duration: 18s; animation-delay: -5s; }
+        .petal:nth-child(4) { top: 35%; left: -8%; animation-duration: 14s; animation-delay: -8s; width: 25px; height: 35px; }
+        .petal:nth-child(5) { top: 45%; left: -12%; animation-duration: 20s; animation-delay: -1s; }
+        .petal:nth-child(6) { top: 55%; left: -3%; animation-duration: 13s; animation-delay: -10s; }
+        .petal:nth-child(7) { top: 65%; left: -18%; animation-duration: 17s; animation-delay: -3s; width: 18px; height: 28px; }
+        .petal:nth-child(8) { top: 75%; left: -10%; animation-duration: 11s; animation-delay: -7s; }
+        .petal:nth-child(9) { top: 85%; left: -5%; animation-duration: 19s; animation-delay: -4s; }
+        .petal:nth-child(10) { top: 95%; left: -14%; animation-duration: 16s; animation-delay: -9s; width: 22px; height: 32px; }
+        .petal:nth-child(11) { top: 10%; left: -20%; animation-duration: 22s; animation-delay: -12s; }
+        .petal:nth-child(12) { top: 20%; left: -7%; animation-duration: 13s; animation-delay: -14s; }
+        .petal:nth-child(13) { top: 50%; left: -15%; animation-duration: 18s; animation-delay: -11s; }
+        .petal:nth-child(14) { top: 80%; left: -10%; animation-duration: 15s; animation-delay: -15s; }
+        .petal:nth-child(15) { top: 90%; left: -5%; animation-duration: 20s; animation-delay: -6s; }
+
+
+        /* --- Responsividade --- */
+        @media (max-width: 900px) {
+            .legend-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            .legend-column-divider {
+                border-left: none;
+                padding-left: 0;
+                border-top: 2px solid var(--border-color);
+                padding-top: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body { 
+                padding-top: 50px; 
+                background-position: center;
+            }
+            html {
+                scroll-padding-top: 60px;
+            }
+            .navbar { height: 50px; }
+            .nav-links { gap: 10px; }
+            .nav-links a { padding: 8px 10px; font-size: 0.9em; }
+            
+            .content-section { padding: 20px 10px; }
+            .container { padding: 25px; }
+            h1 { font-size: 1.8em; }
+            .subtitle { font-size: 1em; }
+            
+            /* --- Estilos da Tabela Responsiva --- */
+            .table-container {
+                overflow-x: hidden; /* Remove a rolagem horizontal */
+            }
+            table {
+                min-width: 100%;
+                border-radius: 0;
+                border: none;
+            }
+            table thead {
+                display: none; /* Esconde o cabeçalho original */
+            }
+            table tr {
+                display: block;
+                margin-bottom: 20px;
+                border-radius: 10px;
+                overflow: hidden;
+                border: 1px solid var(--border-color);
+                box-shadow: 0 4px 8px var(--shadow-color);
+            }
+            table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: right;
+                padding: 12px 15px;
+                border: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            table tr td:last-child {
+                border-bottom: none;
+            }
+            table td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                text-align: left;
+                color: var(--primary-text-color);
+                margin-right: 10px;
+            }
+            .gamete-header {
+                justify-content: center;
+                font-size: 1.1em;
+                font-weight: bold;
+            }
+            .gamete-header::before {
+                display: none; /* Não precisa de label para o cabeçalho da linha */
+            }
+            /* --- Fim dos Estilos da Tabela Responsiva --- */
+
+            .legend, .caption-container { padding: 20px; }
+        }
+
+        @media (max-width: 480px) {
+            html {
+                scroll-padding-top: 50px;
+            }
+            .nav-links {
+                gap: 5px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            .nav-links a {
+                font-size: 0.85em;
+                padding: 6px 8px;
+            }
+            .container {
+                padding: 20px 15px;
+                width: 100%;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+            .content-section {
+                padding: 15px 0;
+            }
+            h1 { font-size: 1.5em; }
+            .subtitle { font-size: 0.9em; }
+            
+            /* Ajustes finos na tabela para telas muito pequenas */
+            table td {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            .genotype { font-size: 1em; }
+            .phenotype-preto, .phenotype-vermelho, .phenotype-branco {
+                padding: 3px 8px;
+                font-size: 0.85em;
+            }
+
+            .legend, .caption-container {
+                padding: 15px;
+            }
+            .legend-item, .caption-item {
+                font-size: 0.95em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container para as pétalas animadas -->
+    <div class="sakura-container">
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-links">
+            <a href="#punnett-square">Modelo Genético</a>
+            <a href="#heredogram">Linhagens de Criação</a>
+        </div>
+    </nav>
+
+    <main>
+        <section id="punnett-square" class="content-section">
+            <div class="container">
+            <h1>Modelo de Cruzamento Genético</h1>
+            <p class="subtitle">Ilustração de Epistasia Recessiva na Cor de Carpas Koi (Modelo Educacional Simplificado)</p>
+            
+            <div class="table-container">
+                <table>
+                <thead>
+                    <tr>
+                    <th class="header-cell">Gametas</th>
+                    <th class="gamete-header">CB</th>
+                    <th class="gamete-header">Cb</th>
+                    <th class="gamete-header">cB</th>
+                    <th class="gamete-header">cb</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td class="gamete-header" data-label="Gameta">CB</td>
+                    <td data-label="CB"><span class="genotype">CCBB</span> <span class="arrow">→</span> <span class="phenotype-preto">Preto</span></td>
+                    <td data-label="Cb"><span class="genotype">CCBb</span> <span class="arrow">→</span> <span class="phenotype-preto">Preto</span></td>
+                    <td data-label="cB"><span class="genotype">CcBB</span> <span class="arrow">→</span> <span class="phenotype-preto">Preto</span></td>
+                    <td data-label="cb"><span class="genotype">CcBb</span> <span class="arrow">→</span> <span class="phenotype-preto">Preto</span></td>
+                    </tr>
+                    <tr>
+                    <td class="gamete-header" data-label="Gameta">Cb</td>
+                    <td data-label="CB"><span class="genotype">CCBb</span> <span class="arrow">→</span> <span class="phenotype-preto">Preto</span></td>
+                    <td data-label="Cb"><span class="genotype">CCbb</span> <span class="arrow">→</span> <span class="phenotype-vermelho">Vermelho</span></td>
+                    <td data-label="cB"><span class="genotype">CcBb</span> <span class="arrow">→</span> <span class="phenotype-preto">Preto</span></td>
+                    <td data-label="cb"><span class="genotype">Ccbb</span> <span class="arrow">→</span> <span class="phenotype-vermelho">Vermelho</span></td>
+                    </tr>
+                    <tr>
+                    <td class="gamete-header" data-label="Gameta">cB</td>
+                    <td data-label="CB"><span class="genotype">CcBB</span> <span class="arrow">→</span> <span class="phenotype-preto">Preto</span></td>
+                    <td data-label="Cb"><span class="genotype">CcBb</span> <span class="arrow">→</span> <span class="phenotype-preto">Preto</span></td>
+                    <td data-label="cB"><span class="genotype">ccBB</span> <span class="arrow">→</span> <span class="phenotype-branco">Branco</span></td>
+                    <td data-label="cb"><span class="genotype">ccBb</span> <span class="arrow">→</span> <span class="phenotype-branco">Branco</span></td>
+                    </tr>
+                    <tr>
+                    <td class="gamete-header" data-label="Gameta">cb</td>
+                    <td data-label="CB"><span class="genotype">CcBb</span> <span class="arrow">→</span> <span class="phenotype-preto">Preto</span></td>
+                    <td data-label="Cb"><span class="genotype">Ccbb</span> <span class="arrow">→</span> <span class="phenotype-vermelho">Vermelho</span></td>
+                    <td data-label="cB"><span class="genotype">ccBb</span> <span class="arrow">→</span> <span class="phenotype-branco">Branco</span></td>
+                    <td data-label="cb"><span class="genotype">ccbb</span> <span class="arrow">→</span> <span class="phenotype-branco">Branco</span></td>
+                    </tr>
+                </tbody>
+                </table>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-grid">
+                <div>
+                    <h3>Legenda dos Genes (Modelo)</h3>
+                    <div class="legend-item"><strong>Gene C (Cor):</strong> Permite a produção de pigmento. O alelo recessivo 'cc' bloqueia a cor (epistasia), resultando em um peixe branco (albino).</div>
+                    <div class="legend-item"><strong>Gene B (Pigmento):</strong> Define o tipo de cor. 'B' para pigmento preto (eumelanina) e 'b' para pigmento vermelho/amarelo (feomelanina).</div>
+                </div>
+                <div class="legend-column-divider">
+                    <h3>Análise da Proporção Fenotípica (9:3:4)</h3>
+                    <div class="legend-item">
+                    <strong><span class="phenotype-preto">9/16 Preto (56,25%)</span></strong>
+                    <div style="font-size: 0.9em; color: var(--secondary-text-color); margin-top: 5px;">
+                        Requer pelo menos um alelo 'C' e um alelo 'B'.
+                    </div>
+                    </div>
+                    <div class="legend-item">
+                    <strong><span class="phenotype-vermelho">3/16 Vermelho (18,75%)</span></strong>
+                    <div style="font-size: 0.9em; color: var(--secondary-text-color); margin-top: 5px;">
+                        Requer pelo menos um alelo 'C' e dois alelos 'b'.
+                    </div>
+                    </div>
+                    <div class="legend-item">
+                    <strong><span class="phenotype-branco">4/16 Branco (25,00%)</span></strong>
+                    <div style="font-size: 0.9em; color: var(--secondary-text-color); margin-top: 5px;">
+                        Ocorre com dois alelos 'c', independentemente do gene B.
+                    </div>
+                    </div>
+                </div>
+                </div>
+                 <div class="legend-item" style="margin-top: 25px; background-color: rgba(20, 20, 20, 0.4); padding: 15px; border-radius: 8px; border-top: 1px solid var(--border-color);">
+                <strong>Conclusão:</strong> A proporção <strong>9:3:4</strong> é a assinatura clássica da epistasia recessiva em um cruzamento diíbrido. A genética de cores em Koi é muito mais complexa, mas este modelo ilustra um princípio genético fundamental.
+                </div>
+            </div>
+            </div>
+        </section>
+
+        <section id="heredogram" class="content-section">
+            <div class="container">
+              <h1 class="main-title">Linhagens de Criação de Koi</h1>
+              <p class="subtitle">Exemplos de Cruzamentos para Obter Variedades Específicas</p>
+              <img src="651.png" alt="Heredograma de cruzamento de carpas Koi" class="main-image">
+              
+              <div class="caption-container">
+                <div class="caption-item">
+                    <h3>1. Magoi + Ki Bekko → Ki-Utsuri</h3>
+                    <div class="legend-item"><strong>Parentais:</strong> Magoi (carpa selvagem preta) e Ki Bekko (amarelo com manchas pretas).</div>
+                    <div class="legend-item"><strong>Objetivo:</strong> Combinar o preto (sumi) forte da Magoi com a base amarela (ki) da Ki Bekko.</div>
+                    <div class="legend-item"><strong>Resultado (F1):</strong> A primeira geração (F1) geralmente resulta em peixes escuros, pois o preto da Magoi é geneticamente dominante. A seleção cuidadosa dos descendentes é necessária para revelar o padrão desejado nas gerações seguintes.</div>
+                </div>
+                <div class="caption-item">
+                    <h3>2. Shiro Bekko + Ki-Utsuri → Shiro-Utsuri</h3>
+                    <div class="legend-item"><strong>Parentais:</strong> Shiro Bekko (branco com manchas pretas) e Ki-Utsuri (preto com manchas amarelas).</div>
+                    <div class="legend-item"><strong>Objetivo:</strong> Produzir um Shiro-Utsuri, que tem um padrão de preto (sumi) sobre uma base branca (shiroji).</div>
+                    <div class="legend-item"><strong>Resultado:</strong> Este cruzamento visa combinar a base branca da Shiro Bekko com o padrão de preto envolvente da Utsuri. A genética é complexa, e apenas uma fração dos descendentes exibirá as características desejadas de um Shiro-Utsuri de qualidade.</div>
+                </div>
+                <div class="caption-item">
+                    <h3>3. Hageshiro + Shiro-Utsuri → Shiro-Utsuri (Refinamento)</h3>
+                    <div class="legend-item"><strong>Parentais:</strong> Hageshiro (uma linhagem de Shiro-Utsuri com preto na cabeça e nadadeiras) e um Shiro-Utsuri de alta qualidade.</div>
+                    <div class="legend-item"><strong>Objetivo:</strong> Refinar e estabilizar a qualidade do padrão sumi (preto) e a pureza do shiroji (branco) na linhagem de Shiro-Utsuri.</div>
+                    <div class="legend-item"><strong>Resultado:</strong> Este é um cruzamento de aprimoramento (outcross), não para criar uma nova variedade, mas para melhorar as características de uma já existente, buscando um equilíbrio ideal entre preto e branco.</div>
+                </div>
+                <div class="caption-item">
+                    <h3>4. Ki-Utsuri + Aka Bekko → Hi-Utsuri</h3>
+                    <div class="legend-item"><strong>Parentais:</strong> Ki-Utsuri (preto e amarelo) e Aka Bekko (vermelho com manchas pretas).</div>
+                    <div class="legend-item"><strong>Objetivo:</strong> Substituir a base amarela (ki) da Ki-Utsuri pela base vermelha (hi) da Aka Bekko para produzir um Hi-Utsuri (preto e vermelho).</div>
+                    <div class="legend-item"><strong>Resultado:</strong> Este cruzamento é uma técnica para criar ou aprimorar a variedade Hi-Utsuri. O objetivo é combinar o padrão de preto (sumi) da linhagem Utsuri com uma cor vermelha (hi) vibrante, resultando em um peixe com base preta e marcações vermelhas.</div>
+                </div>
+                <div class="caption-item">
+                    <h3>5. Hi-Utsuri + Kohaku → Showa Sanshoku</h3>
+                    <div class="legend-item"><strong>Parentais:</strong> Hi-Utsuri (preto e vermelho) e Kohaku (branco e vermelho).</div>
+                    <div class="legend-item"><strong>Objetivo:</strong> Combinar as três cores (preto, vermelho, branco) para produzir a variedade Showa Sanshoku.</div>
+                    <div class="legend-item"><strong>Resultado:</strong> Este é um dos cruzamentos clássicos para a produção de Showa. O desafio é obter o padrão característico da Showa, onde o preto (sumi) se manifesta em faixas envolventes sobre o padrão vermelho e branco. A seleção rigorosa ao longo de várias gerações é crucial para o sucesso.</div>
+                </div>
+
+                <div class="caption-item">
+                    <h3>Fonte da Imagem</h3>
+                    <div class="legend-item"><strong>Disponível em:</strong> <a href="https://share.google/images/wr1ea0wT5c6cqXznn" target="_blank" style="color: #cccccc; text-decoration: none;">Google - Heredogramas de Koi</a></div>
+                </div>
+              </div>
+            </div>
+        </section>
+    </main>
+
+</body>
+</html>
